@@ -22,19 +22,3 @@ COPY ui.R /srv/shiny-server/igfstest/
 
 EXPOSE 3838
 CMD ["/usr/bin/shiny-server.sh"]
-
-
-COPY www /srv/shiny-server/igfstest/www
-COPY Data /srv/shiny-server/igfstest/Data
-COPY Indices /srv/shiny-server/igfstest/Indices
-COPY VBGM_coeff /srv/shiny-server/igfstest
-COPY IGFStest.Rproj /srv/shiny-server/igfstest/
-COPY README.md /srv/shiny-server/igfstest/
-COPY app.js /srv/shiny-server/igfstest/
-COPY global.R /srv/shiny-server/igfstest/
-COPY google-analytics.js /srv/shiny-server/igfstest/
-COPY server.R /srv/shiny-server/igfstest/
-COPY ui.R /srv/shiny-server/igfstest/
-
-EXPOSE 3838
-CMD ["/usr/bin/shiny-server.sh"]
