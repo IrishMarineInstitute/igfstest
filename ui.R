@@ -13,6 +13,10 @@ dashboardPage(
     selectInput("sp1", "Select a species:", 
                 choices = levels(sp_names$species),selectize = TRUE,selected = "Haddock"))),
   dashboardBody(
+    tags$style(type="text/css",
+               ".shiny-output-error { visibility: hidden; }",
+               ".shiny-output-error:before { visibility: hidden; }"
+    ),
     tabItems(
       tabItem("dashboard",
     fluidPage(
@@ -90,8 +94,9 @@ dashboardPage(
         ),
         tabPanel("Plots",
                  box(width=3,status = "primary",uiOutput("yearfilter"),
-                     selectInput("parameter", h3("Select Parameter"),
-                                 choices = c("None", "Gear", "Sex", "Division"), selected = "None"),
+                     uiOutput("paramselector"),
+                     # selectInput("parameter", h3("Select Parameter"),
+                     #             choices = c("None", "Gear", "Sex", "Division"), selected = "None"),
                      uiOutput("divfilter"),
                      uiOutput("LWAdownload")),
                  tabBox(id="tabselected",width=9,tabPanel("CPUE", value="cpue",

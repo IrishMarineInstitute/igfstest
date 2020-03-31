@@ -193,3 +193,92 @@ coeff_L_A<-read.csv("Data/coeff_L_A.csv")
 
 ############################################
 vbTyp = function(age, Linf, K, t0)Linf*(1-exp(-K*(age-t0)))
+
+# 
+# 
+# ###########Nephrops#######
+ datN<-read.csv("Data/datNEP.csv")
+ 
+ datN$Functional_Unit<-as.factor(datN$Functional_Unit)
+ datN<-filter(datN,Functional_Unit==16|Functional_Unit==17|Functional_Unit==19|Functional_Unit==22|Functional_Unit==99|Functional_Unit==2021)
+ datN$Functional_Unit<-droplevels(datN$Functional_Unit)
+ levels(datN$Functional_Unit)<-c("16" ,  "17" ,  "19" ,  "22" ,  "Outside FU" ,  "20-21")
+
+ datN$Kg_Hr= datN$PredWt_Kg/datN$TowDurationMin*60
+ datN$No_Km2= datN$NepCount/datN$AreaKmSq
+ datN$No_30min = datN$NepCount/datN$TowDurationMin*30
+ datN$AgeClassification<-datN$CLmm
+ 
+ datN$AgeClassification[which(datN$CLmm>17)]<-"Adult"
+ datN$AgeClassification[which(datN$CLmm<=17)]<-"Juvenile"
+ datN$AgeClassification<-as.factor(datN$AgeClassification)
+ datN$Functional_Unit<-as.factor(datN$Functional_Unit)
+
+ dat_raised= aggregate(datN[,c("NepCount", "PredWt_Kg", "Kg_Hr", "No_Km2", "No_30min")], 
+                       by=list(datN$Year, datN$Survey_Code, datN$Haul, datN$Functional_Unit, datN$Fishing_Grounds,
+                               datN$fldShotLatDecimalDegrees,datN$fldShotLonDecimalDegrees, 
+                               datN$fldHaulLatDecimalDegrees, datN$fldHaulLonDecimalDegrees),
+                      FUN=sum,  na.rm=TRUE)
+ names(dat_raised) = c("Year", "Survey_Code", "Haul", "Functional_Unit", "Fishing_Grounds",
+                      "Lat", "Lon", "LatV2", "LonV2", "NepCount", "PredWt_Kg", "Kg_Hr", "No_Km2", "No_30min")
+ 
+dat_raised$symbSize <- sqrt( dat_raised$Kg_Hr/ pi )
+dat_raised$symbSize2 <- sqrt( dat_raised$No_Km2/ pi )
+dat_raised$symbSize3 <- sqrt( dat_raised$No_30min/ pi )
+# 
+# 
+# 
+# 
+# # Read in shapefiles
+# 
+FU <- rgdal::readOGR("Data/FU","Nephrops_Functional_Unit_Cut")
+# 
+# 
+ centers <-readRDS("Data/centers.RDS")
+# 
+# 
+ #Juveniles Nep
+JuvenilesN= filter(datN, AgeClassification=="Juvenile")
+if(dim(JuvenilesN)[1]>0){
+ JuvNumbersMapN=aggregate(JuvenilesN[,c("NepCount", "PredWt_Kg", "Kg_Hr", "No_Km2", "No_30min")],
+                          by=list(JuvenilesN$Year, JuvenilesN$Survey_Code, JuvenilesN$Haul, JuvenilesN$Functional_Unit, JuvenilesN$Fishing_Grounds,
+                                  JuvenilesN$fldShotLatDecimalDegrees,JuvenilesN$fldShotLonDecimalDegrees, 
+                                  JuvenilesN$fldHaulLatDecimalDegrees, JuvenilesN$fldHaulLonDecimalDegrees),
+                           FUN=sum,  na.rm=TRUE)
+ names(JuvNumbersMapN) = c("Year", "Survey_Code", "Haul", "Functional_Unit", "Fishing_Grounds",
+                            "Lat", "Lon", "LatV2", "LonV2", "NepCount", "PredWt_Kg", "Kg_Hr", "No_Km2", "No_30min")
+  JuvNumbersMapN$symbSize <- sqrt( JuvNumbersMapN$No_30min/ pi )
+}else{
+  JuvNumbersMapN=data.frame("Year"=maxyear, "Survey_Code"=NA, "Haul"=NA, "Functional_Unit"=NA, "Fishing_Grounds"=NA,
+                             "Lat"=55.109, "Lon"=-9.558, "LatV2"=NA, "LonV2"=NA, "NepCount"=NA, "PredWt_Kg"=NA, 
+                            "Kg_Hr"=NA, "No_Km2"=NA, "No_30min"=NA,"symbSize"=NA)}
+
+
+ 
+# #Adults
+ AdultsN= filter(datN, AgeClassification=="Adult")
+ if(dim(AdultsN)[1]>0){
+  AdultNumbersMapN=aggregate(AdultsN[,c("NepCount", "PredWt_Kg", "Kg_Hr", "No_Km2", "No_30min")],
+                             by=list(AdultsN$Year, AdultsN$Survey_Code, AdultsN$Haul, AdultsN$Functional_Unit, AdultsN$Fishing_Grounds,
+                                     AdultsN$fldShotLatDecimalDegrees,AdultsN$fldShotLonDecimalDegrees, 
+                                    AdultsN$fldHaulLatDecimalDegrees, AdultsN$fldHaulLonDecimalDegrees),
+                            FUN=sum,  na.rm=TRUE)
+  names(AdultNumbersMapN) = c("Year", "Survey_Code", "Haul", "Functional_Unit", "Fishing_Grounds",
+                             "Lat", "Lon", "LatV2", "LonV2", "NepCount", "PredWt_Kg", "Kg_Hr", "No_Km2", "No_30min")
+   AdultNumbersMapN$symbSize <- sqrt( AdultNumbersMapN$No_30min/ pi )
+ }else{
+   AdultNumbersMapN=data.frame("Year"=maxyear, "Survey_Code"=NA, "Haul"=NA, "Functional_Unit"=NA, "Fishing_Grounds"=NA,
+                             "Lat"=55.109, "Lon"=-9.558, "LatV2"=NA, "LonV2"=NA, "NepCount"=NA, "PredWt_Kg"=NA,
+                             "Kg_Hr"=NA, "No_Km2"=NA, "No_30min"=NA,"symbSize"=NA)}
+# 
+# 
+# 
+# 
+# NEP Length/Weight Plot#########
+lw<-datN
+ lw$NepCount<-round(lw$NepCount,0)
+ lw$Weight_g<-(lw$PredWt_Kg/lw$NepCount)*1000
+# 
+# 
+ indLW<-lw%>%uncount(NepCount)
+ indLW$FUnit<-as.factor(indLW$Functional_Unit)
