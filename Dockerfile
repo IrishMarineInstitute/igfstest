@@ -16,7 +16,7 @@ RUN Rscript -e "install.packages(c('plotly','shiny','shinyjs','htmltools','resha
 COPY www /srv/shiny-server/igfstest/www
 COPY Data /srv/shiny-server/igfstest/Data
 COPY Indices /srv/shiny-server/igfstest/Indices
-COPY VBGM_coeff /srv/shiny-server/igfstest
+COPY R /srv/shiny-server/igfstest/R
 COPY IGFStest.Rproj /srv/shiny-server/igfstest/
 COPY README.md /srv/shiny-server/igfstest/
 COPY app.js /srv/shiny-server/igfstest/
