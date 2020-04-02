@@ -11,6 +11,7 @@ RUN Rscript -e "install.packages(c('shinythemes','shinydashboard','flexdashboard
 RUN sudo apt-get update && apt-get install -y libprotobuf-dev protobuf-compiler libv8-3.14-dev libjq-dev && apt-get clean && rm -rf /var/lib/apt/lists/ && rm -rf /tmp/downloaded_packages/ /tmp/*.rds
 RUN Rscript -e "install.packages(c('tidyr','geojsonio'), repos='https://cran.rstudio.com/')" && rm -rf /tmp/downloaded_packages/ /tmp/*.rds
 RUN Rscript -e "install.packages(c('plotly','shiny','shinyjs','htmltools','reshape2','DT'), repos='https://cran.rstudio.com/')" && rm -rf /tmp/downloaded_packages/ /tmp/*.rds
+RUN Rscript -e "install.packages(c('rgdal'), repos='https://cran.rstudio.com/')" && rm -rf /tmp/downloaded_packages/ /tmp/*.rds
 
 
 COPY www /srv/shiny-server/igfstest/www
