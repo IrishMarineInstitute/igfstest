@@ -301,7 +301,7 @@ species=reactive({input$sp1})
 speciesFAO=reactive({filter(sp_names,species==input$sp1)$speciesFAO })
 
 ####Species Title###
-output$Sp_name=renderUI({list(h3(paste("Species Name:",species())),h3(paste("FAQ Code:", speciesFAO())))})
+output$Sp_name=renderUI({list(h3(paste("Species Name:",species())),h3(paste("FAO Code:", speciesFAO())))})
 #####for map#####
 output$yearfilter1=renderUI({
   sliderInput("slideryearS", "Choose Year:", min = 2003, max = maxyear, value = maxyear, step = NULL, 
@@ -396,12 +396,12 @@ datS=reactive({
  })
  
  data1S=reactive({
-   ##need if
+   
    dplyr::filter(data1,Species%in%speciesFAO())
  })
  
  LengthDataS=reactive({
-   ##need if
+  
    dplyr::filter(LengthData,Species%in%speciesFAO())
  })
 
@@ -440,11 +440,14 @@ output$mymap <- renderLeaflet({
 })
 icon.ship <- makeIcon(iconUrl  = 'www/x-mark-16.png', iconHeight = 7, iconWidth = 7)
 observe({
-  new_zoom <- input$mymap_zoom
+ req(input$pages=="map")
+ new_zoom <- input$mymap_zoom
   if(is.na(juv_length_split())==FALSE){
     if(input$sp1=="Nephrops"){
       leafletProxy('mymap') %>%
-        clearGroup(group =  c("Catch Rate kg/hr", "Distribution No/km<sup>2</sup>",  "Total No of Nephrops per 30 min Haul", "No of Juvenile Nephrops per 30 min Haul", "No of Adult Nephrops per 30 min Haul"))%>%
+        clearGroup(group =  c("Catch Rate kg/hr", "Distribution No/km<sup>2</sup>", 
+                              "Total No of Nephrops per 30 min Haul", "No of Juvenile Nephrops per 30 min Haul", 
+                              "No of Adult Nephrops per 30 min Haul"))%>%
         addMarkers(lng=haul()$fldShotLonDecimalDegrees, lat=haul()$fldShotLatDecimalDegrees, icon =icon.ship, 
                    group="Stations Surveyed", 
                    popup=paste("<b>Station:</b> ",haul()$fldPrimeStation, "<br />", "<b>Gear Type:</b> ",haul()$Gear_Type,"<br />", 
@@ -477,7 +480,10 @@ observe({
           options = layersControlOptions(collapsed = FALSE)
         )
     }
-  else{leafletProxy('mymap') %>%
+  else{
+    
+    
+    leafletProxy('mymap') %>%
     clearGroup(group =  c("Catch Rate kg/hr", "Distribution No/km<sup>2</sup>", "Stations Surveyed", 
                           "Total No of Fish per 30 min Haul", "No of Juvenile Fish per 30 min Haul", "No of Adult Fish per 30 min Haul"))%>%
     addMarkers(lng=haul()$fldShotLonDecimalDegrees, lat=haul()$fldShotLatDecimalDegrees, icon =icon.ship, 
@@ -486,21 +492,22 @@ observe({
                            "<b>Tow Duration:</b> ",haul()$TowDurationMin, "mins", "<br />", "<b>Door Spread:</b> ",haul()$DoorSpread, "<br />",  
                            "<b>Wing Spread:</b> ",haul()$fldWingSpread, "<br />", "<b>Headline Height:</b> ",haul()$fldHeadlineHeight, "<br />",  
                            "<b>Distance KM:</b> ",round(haul()$Dist_Km,2),"<br />", "<b>Stratum:</b> ", haul()$fldStratum))%>%
-    addCircles(lng=cat()$Lon, lat=cat()$Lat, radius=1000*cat()$symbSize/new_zoom, group="Catch Rate kg/hr", 
+   addCircles(lng=cat()$Lon, lat=cat()$Lat, radius=10000*cat()$symbSize/new_zoom, group="Catch Rate kg/hr", 
+      
                popup=paste("<b>Species:</b> ",species(), "<br />","<b>Cruise:</b> ",cat()$Cruise, "<br />", "<b>Haul</b>: ",cat()$Haul, "<br />", 
                            "<b>Station:</b> ",cat()$Prime_Stn, "<br />", "<b>Catch Kg/Hr:</b> ", round(cat()$Kg_Per_Hr,2)))%>%
-    addCircles(lng=mapdataSS()$LonDec, lat=mapdataSS()$LatDec, radius=1000*mapdataSS()$symbSize/new_zoom, color = "purple",  
+    addCircles(lng=mapdataSS()$LonDec, lat=mapdataSS()$LatDec, radius=2000*mapdataSS()$symbSize/new_zoom, color = "purple",  
                group="Distribution No/km<sup>2</sup>", popup=paste("<b>Species:</b> ",species(), "<br />","<b>Haul:</b> ",mapdataSS()$Haul, "<br />", 
                                                                    "<b>No per km<sup>2</sup>:</b> ", round(mapdataSS()$No_km2,0)))%>%
-    addCircles(lng=TotalNumbers()$LonDec, lat=TotalNumbers()$LatDec, radius=1000*TotalNumbers()$symbSize/new_zoom, 
+    addCircles(lng=TotalNumbers()$LonDec, lat=TotalNumbers()$LatDec, radius=5000*TotalNumbers()$symbSize/new_zoom, 
                color = "black",  group="Total No of Fish per 30 min Haul", 
                popup=paste("<b>Species:</b> ",species(), "<br />","<b>Haul:</b> ",TotalNumbers()$Haul, "<br />", "<b>No of Fish per 30 min Haul:</b> ",
                            round(TotalNumbers()$CatchNos30minHaul,0)))  %>%
-    addCircles(lng=JuvNumbers()$LonDec, lat=JuvNumbers()$LatDec, radius=1000*JuvNumbers()$symbSize/new_zoom, 
+    addCircles(lng=JuvNumbers()$LonDec, lat=JuvNumbers()$LatDec, radius=5000*JuvNumbers()$symbSize/new_zoom, 
                color = "yellow",  group="No of Juvenile Fish per 30 min Haul", 
                popup=paste("<b>Species:</b> ",species(), "<br />","<b>Haul:</b> ",JuvNumbers()$Haul, "<br />", "<b>No of Juvenile Fish per 30 min Haul:</b> ",
                            round(JuvNumbers()$CatchNos30minHaul,0)))  %>%
-    addCircles(lng=AdultNumbers()$LonDec, lat=AdultNumbers()$LatDec, radius=1000*AdultNumbers()$symbSize/new_zoom, 
+    addCircles(lng=AdultNumbers()$LonDec, lat=AdultNumbers()$LatDec, radius=5000*AdultNumbers()$symbSize/new_zoom, 
                color = "green",  group="No of Adult Fish per 30 min Haul", 
                popup=paste("<b>Species:</b> ",species(), "<br />","<b>Haul:</b> ",AdultNumbers()$Haul, "<br />", "<b>No of Adult Fish per 30 min Haul:</b> ",
                            round(AdultNumbers()$CatchNos30minHaul,0)))%>%
@@ -520,13 +527,13 @@ observe({
                              "<b>Tow Duration:</b> ",haul()$TowDurationMin, "mins", "<br />", "<b>Door Spread:</b> ",haul()$DoorSpread, "<br />",  
                              "<b>Wing Spread:</b> ",haul()$fldWingSpread, "<br />", "<b>Headline Height:</b> ",haul()$fldHeadlineHeight, "<br />",  
                              "<b>Distance KM:</b> ",round(haul()$Dist_Km,2),"<br />", "<b>Stratum:</b> ", haul()$fldStratum))%>%
-      addCircles(lng=cat()$Lon, lat=cat()$Lat, radius=1000*cat()$symbSize/new_zoom, group="Catch Rate kg/hr", 
+      addCircles(lng=cat()$Lon, lat=cat()$Lat, radius=10000*cat()$symbSize/new_zoom, group="Catch Rate kg/hr", 
                  popup=paste("<b>Species:</b> ",species(), "<br />","<b>Cruise:</b> ",cat()$Cruise, "<br />", "<b>Haul</b>: ",cat()$Haul, "<br />", 
                              "<b>Station:</b> ",cat()$Prime_Stn, "<br />", "<b>Catch Kg/Hr:</b> ", round(cat()$Kg_Per_Hr,2)))%>%
-      addCircles(lng=mapdataSS()$LonDec, lat=mapdataSS()$LatDec, radius=1000*mapdataSS()$symbSize/new_zoom, color = "purple",  
+      addCircles(lng=mapdataSS()$LonDec, lat=mapdataSS()$LatDec, radius=2000*mapdataSS()$symbSize/new_zoom, color = "purple",  
                  group="Distribution No/km<sup>2</sup>", popup=paste("<b>Species:</b> ",species(), "<br />","<b>Haul:</b> ",mapdataSS()$Haul, "<br />", 
                                                                      "<b>No per km<sup>2</sup>:</b> ", round(mapdataSS()$No_km2,0)))%>%
-      addCircles(lng=TotalNumbers()$LonDec, lat=TotalNumbers()$LatDec, radius=1000*TotalNumbers()$symbSize/new_zoom, 
+      addCircles(lng=TotalNumbers()$LonDec, lat=TotalNumbers()$LatDec, radius=5000*TotalNumbers()$symbSize/new_zoom, 
                  color = "black",  group="Total No of Fish per 30 min Haul", 
                  popup=paste("<b>Species:</b> ",species(), "<br />","<b>Haul:</b> ",TotalNumbers()$Haul, "<br />", "<b>No of Fish per 30 min Haul:</b> ",
                              round(TotalNumbers()$CatchNos30minHaul,0)))  %>%
@@ -537,6 +544,7 @@ observe({
         options = layersControlOptions(collapsed = FALSE)
       )}
 })
+
 
 
 ############

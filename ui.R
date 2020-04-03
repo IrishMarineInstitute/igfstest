@@ -82,7 +82,7 @@ dashboardPage(
       )
       )),
     tabItem("sp", uiOutput("Sp_name"), fluidRow(
-      tabBox(width=12,height = "650px",
+      tabBox(id="pages",width=12,height = "650px",
         tabPanel("Mapping",value = "map",
                  box(width=3, status = "primary",uiOutput("yearfilter1")
                     ,downloadButton("downloadData_map", "Download Map data")),
@@ -92,7 +92,7 @@ dashboardPage(
                  leafletOutput('mymap', height=600)
                  )
         ),
-        tabPanel("Plots",
+        tabPanel("Plots",value="plots",
                  box(width=3,status = "primary",uiOutput("yearfilter"),
                      uiOutput("paramselector"),
                      # selectInput("parameter", h3("Select Parameter"),
