@@ -553,7 +553,8 @@ observe({
 output$cpueplotall=renderPlotly({
   if(input$sp1=="Nephrops"){
     catchAll <- aggregate(list(KgHr=N_FU()$Kg_Hr), list(Cruise=N_FU()$Survey_Code, Year= N_FU()$Year),mean, na.rm=TRUE)
-    p=ggplot(N_FU(), aes(x=Year, y=Kg_Hr)) + geom_jitter(width = 0.05, colour="grey") + 
+    p=ggplot(N_FU(), aes(x=Year, y=Kg_Hr)) + 
+      geom_jitter(width = 0.05, colour="grey",aes(text=sprintf("Station: %s", Haul))) + 
       geom_line(data=catchAll, aes(x=Year, y =KgHr), size=1)+ylab("KG/Hour") + facet_wrap(~Functional_Unit)+
       theme_bw()  + theme(legend.position = "none")+ 
       theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5,size=8))+
@@ -563,7 +564,7 @@ output$cpueplotall=renderPlotly({
   }
  else{catchAll <- aggregate(list(KgHr=datS()$Kg_Per_Hr), list(Cruise=datS()$Cruise, Year= datS()$Year),mean, na.rm=TRUE)
   p=ggplot(datS(), aes(x=Year, y=Kg_Per_Hr)) + 
-    geom_point(width = 0.05,colour="grey")+ 
+    geom_point(width = 0.05,colour="grey",aes(text=sprintf("Station: %s", Haul)))+ 
     geom_line(data=catchAll, aes(x=Year, y =KgHr), size=1)+ ylab("KG/Hour") +
     theme_bw() + theme(legend.position = "none")
   ggplotly(p)}
@@ -572,7 +573,7 @@ output$cpueplotall=renderPlotly({
 output$cpueplotparam=renderPlotly({
   if(input$sp1=="Nephrops"){ 
     catchsex <- aggregate(list(KgHr=N_FU()$Kg_Hr), list(Cruise=N_FU()$Survey_Code, Year= N_FU()$Year,Sex=N_FU()$Sex),mean, na.rm=TRUE)
-  p=ggplot(N_FU(), aes(x=Year, y=Kg_Hr,colour=Sex)) + geom_jitter(width = 0.05) + 
+  p=ggplot(N_FU(), aes(x=Year, y=Kg_Hr,colour=Sex)) + geom_jitter(width = 0.05,aes(text=sprintf("Station: %s", Haul))) + 
     geom_line(data=catchsex, aes(x=Year, y =KgHr), size=1)+ ylab("KG/Hour") + facet_wrap(~Sex)+
     theme_bw() + theme(legend.position = "none")+
     theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5,size=8))+
@@ -584,13 +585,13 @@ output$cpueplotparam=renderPlotly({
   }else if(input$parameter=="Sex"){
     catchSex <- aggregate(list(KgHr=datS()$Kg_Per_Hr), 
                           list(Cruise=datS()$Cruise, Year=datS()$Year, fldSex=datS()$fldSex), mean, na.rm=TRUE)
-    p=ggplot(datS(), aes(x=Year, y=Kg_Per_Hr, colour=fldSex)) + geom_jitter(width = 0.05) + 
+    p=ggplot(datS(), aes(x=Year, y=Kg_Per_Hr, colour=fldSex)) + geom_jitter(width = 0.05,aes(text=sprintf("Station: %s", Haul))) + 
       geom_line(data=catchSex, aes(x=Year, y =KgHr), size=1)+ ylab("KG/Hour") +  scale_color_manual(values=c("U"="#F8766D","F"="#00BFC4","M"="#B79F00"))+
       facet_wrap(~fldSex) + theme_bw() + theme(legend.position = "none")
   }else if(input$parameter=="Gear"){
     catchGear <- aggregate(list(KgHr=datS()$Kg_Per_Hr), 
                            list(Cruise=datS()$Cruise, Year= datS()$Year, fldGearDescription=datS()$fldGearDescription), mean, na.rm=TRUE)
-    p=ggplot(datS(), aes(x=Year, y=Kg_Per_Hr, colour=fldGearDescription)) + geom_jitter(width = 0.05) + 
+    p=ggplot(datS(), aes(x=Year, y=Kg_Per_Hr, colour=fldGearDescription)) + geom_jitter(width = 0.05,aes(text=sprintf("Station: %s", Haul))) + 
       geom_line(data=catchGear, aes(x=Year, y =KgHr), size=1)+ ylab("KG/Hour") +
       facet_wrap(~fldGearDescription) + theme_bw() + theme(legend.position = "none")
   }else if(input$parameter=="Division"){
@@ -601,7 +602,7 @@ output$cpueplotparam=renderPlotly({
       catchArea <- aggregate(list(KgHr=cpuebydiv$Kg_Per_Hr), 
                              list(Cruise=cpuebydiv$Cruise, Year= cpuebydiv$Year,  
                                   ICESCODE=cpuebydiv$ICESCODE), mean, na.rm=TRUE)
-      p=ggplot(cpuebydiv, aes(x=Year, y=Kg_Per_Hr, colour=ICESCODE)) + geom_jitter(width = 0.05) + 
+      p=ggplot(cpuebydiv, aes(x=Year, y=Kg_Per_Hr, colour=ICESCODE)) + geom_jitter(width = 0.05,aes(text=sprintf("Station: %s", Haul))) + 
         geom_line(data=catchArea, aes(x=Year, y =KgHr), size=1)+ ylab("KG/Hour") +
         facet_wrap(~ICESCODE) + theme_bw() + theme(legend.position = "none")+ scale_colour_manual(values=def)
     }
