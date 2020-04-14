@@ -102,7 +102,7 @@ dashboardPage(
                  tabBox(id="tabselected",width=9,tabPanel("CPUE", value="cpue",
                                  fluidRow(column(5, plotlyOutput("cpueplotall", width="100%")),
                                           column(7, plotlyOutput("cpueplotparam", width="100%"))),
-                                 "* The line is the mean CPUE by Year"),
+                                 "* The line is the mean CPUE by Year for stations with positive catches"),
                         tabPanel("Abundance", value="abundance",
                                  fluidRow(column(5, plotlyOutput("abundanceplotall", width="100%")),
                                           column(7, plotlyOutput("abundanceplotparam", width="100%"))),

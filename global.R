@@ -91,13 +91,17 @@ dat1$symbSize <- sqrt( dat1$Kg_Per_Hr/ pi )
 div <- geojsonio::geojson_read("Data/div_simple.geojson", what = "sp")
 cont <- geojsonio::geojson_read("Data/cont1_simple.geojson", what = "sp")
 
-#Used for Distribution no/km2 and Abundance
 
+#Used for CPUE
+
+
+#Used for Distribution no/km2 and Abundance
+Kg_Per_Hr<-with(data1,(data1$CatchKg/data1$Time_Min)*60)
 ##calculating swept area estimates
 catch_km2<-with(data1,(1/AreaKmSq*CatchKg))
 No_km2<-with(data1,(1/AreaKmSq*RaisedNo))
 Area<-ifelse(data1$ICESCODE=="VIa","VI","VII")
-data1<-cbind(data1,catch_km2,No_km2, Area)
+data1<-cbind(data1,catch_km2,No_km2, Area,Kg_Per_Hr)
 #Agregate by Haul and species to get unique haul data for skt
 mapdataS<-aggregate(data1[,c("CatchKg", "RaisedNo", "catch_km2", "No_km2")], 
                    by=list(data1$Yr,data1$Haul,data1$LonDec, data1$LatDec, data1$Species),FUN=sum,  na.rm=TRUE)
@@ -218,10 +222,10 @@ vbTyp = function(age, Linf, K, t0)Linf*(1-exp(-K*(age-t0)))
  dat_raised= aggregate(datN[,c("NepCount", "PredWt_Kg", "Kg_Hr", "No_Km2", "No_30min")], 
                        by=list(datN$Year, datN$Survey_Code, datN$Haul, datN$Functional_Unit, datN$Fishing_Grounds,
                                datN$fldShotLatDecimalDegrees,datN$fldShotLonDecimalDegrees, 
-                               datN$fldHaulLatDecimalDegrees, datN$fldHaulLonDecimalDegrees),
+                               datN$fldHaulLatDecimalDegrees, datN$fldHaulLonDecimalDegrees,datN$Sex),
                       FUN=sum,  na.rm=TRUE)
  names(dat_raised) = c("Year", "Survey_Code", "Haul", "Functional_Unit", "Fishing_Grounds",
-                      "Lat", "Lon", "LatV2", "LonV2", "NepCount", "PredWt_Kg", "Kg_Hr", "No_Km2", "No_30min")
+                      "Lat", "Lon", "LatV2", "LonV2","Sex", "NepCount", "PredWt_Kg", "Kg_Hr", "No_Km2", "No_30min")
  
 dat_raised$symbSize <- sqrt( dat_raised$Kg_Hr/ pi )
 dat_raised$symbSize2 <- sqrt( dat_raised$No_Km2/ pi )

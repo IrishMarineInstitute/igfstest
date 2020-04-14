@@ -387,7 +387,8 @@ haul = reactive({
  
  ####Plots####
  N_FU<-reactive({
-   dplyr::filter(datN,Functional_Unit==input$parameterN)
+   if(input$tabselected=="lf"){dplyr::filter(datN,Functional_Unit==input$parameterN)}
+   else {dplyr::filter(dat_raised,Functional_Unit==input$parameterN)}
  })
  
 datS=reactive({
@@ -450,7 +451,7 @@ observe({
                               "No of Adult Nephrops per 30 min Haul"))%>%
         addMarkers(lng=haul()$fldShotLonDecimalDegrees, lat=haul()$fldShotLatDecimalDegrees, icon =icon.ship, 
                    group="Stations Surveyed", 
-                   popup=paste("<b>Station:</b> ",haul()$fldPrimeStation, "<br />", "<b>Gear Type:</b> ",haul()$Gear_Type,"<br />", 
+                   popup=paste("<b>Haul:</b> ",haul()$fldCruiseStationNumber, "<br />","<b>Station:</b> ",haul()$fldPrimeStation, "<br />", "<b>Gear Type:</b> ",haul()$Gear_Type,"<br />", 
                                "<b>Tow Duration:</b> ",haul()$TowDurationMin, "mins", "<br />", "<b>Door Spread:</b> ",haul()$DoorSpread, "<br />",  
                                "<b>Wing Spread:</b> ",haul()$fldWingSpread, "<br />", "<b>Headline Height:</b> ",haul()$fldHeadlineHeight, "<br />",  
                                "<b>Distance KM:</b> ",round(haul()$Dist_Km,2),"<br />", "<b>Stratum:</b> ", haul()$fldStratum)) %>%
@@ -488,7 +489,7 @@ observe({
                           "Total No of Fish per 30 min Haul", "No of Juvenile Fish per 30 min Haul", "No of Adult Fish per 30 min Haul"))%>%
     addMarkers(lng=haul()$fldShotLonDecimalDegrees, lat=haul()$fldShotLatDecimalDegrees, icon =icon.ship, 
                group="Stations Surveyed", 
-               popup=paste("<b>Station:</b> ",haul()$fldPrimeStation, "<br />", "<b>Gear Type:</b> ",haul()$Gear_Type,"<br />", 
+               popup=paste("<b>Haul:</b> ",haul()$fldCruiseStationNumber, "<br />","<b>Station:</b> ",haul()$fldPrimeStation, "<br />", "<b>Gear Type:</b> ",haul()$Gear_Type,"<br />", 
                            "<b>Tow Duration:</b> ",haul()$TowDurationMin, "mins", "<br />", "<b>Door Spread:</b> ",haul()$DoorSpread, "<br />",  
                            "<b>Wing Spread:</b> ",haul()$fldWingSpread, "<br />", "<b>Headline Height:</b> ",haul()$fldHeadlineHeight, "<br />",  
                            "<b>Distance KM:</b> ",round(haul()$Dist_Km,2),"<br />", "<b>Stratum:</b> ", haul()$fldStratum))%>%
@@ -562,12 +563,30 @@ output$cpueplotall=renderPlotly({
     ggplotly(p,width=300)
    # plotly_build(p)
   }
- else{catchAll <- aggregate(list(KgHr=datS()$Kg_Per_Hr), list(Cruise=datS()$Cruise, Year= datS()$Year),mean, na.rm=TRUE)
-  p=ggplot(datS(), aes(x=Year, y=Kg_Per_Hr)) + 
-    geom_point(width = 0.05,colour="grey",aes(text=sprintf("Station: %s", Haul)))+ 
-    geom_line(data=catchAll, aes(x=Year, y =KgHr), size=1)+ ylab("KG/Hour") +
-    theme_bw() + theme(legend.position = "none")
-  ggplotly(p)}
+ else{
+    
+   
+  #  catchAll<-aggregate(data1S()[,c("Kg_Per_Hr")],by=list(data1S()$Yr,data1S()$Haul),FUN=sum,  na.rm=TRUE) 
+  #  names(catchAll)=c("Year", "Haul", "KgHr")
+  #  
+  #  catchmean<-aggregate(data1S()[,c("Kg_Per_Hr")],by=list(data1S()$Yr),FUN=mean,  na.rm=TRUE) 
+  #  names(catchmean)=c("Year", "KgHr")
+  #  
+  # p=ggplot(catchAll, aes(x=Year, y=KgHr)) + 
+  #   geom_point(width = 0.05,colour="grey",aes(text=sprintf("Station: %s", Haul)))+ 
+  #   geom_line(data=catchmean, aes(x=Year, y =KgHr), size=1)+ ylab("KG/Hour") +
+  #   theme_bw() + theme(legend.position = "none")
+  # ggplotly(p)
+   
+   catchAll <- aggregate(list(KgHr=datS()$Kg_Per_Hr), list(Cruise=datS()$Cruise, Year= datS()$Year),mean, na.rm=TRUE)
+   p=ggplot(datS(), aes(x=Year, y=Kg_Per_Hr)) + 
+     geom_point(width = 0.05,colour="grey",aes(text=sprintf("Station: %s", Haul)))+ 
+     geom_line(data=catchAll, aes(x=Year, y =KgHr), size=1)+ ylab("KG/Hour") +
+     theme_bw() + theme(legend.position = "none")
+   ggplotly(p)
+   
+   
+   }
 })
 
 output$cpueplotparam=renderPlotly({
