@@ -417,13 +417,28 @@ output$mymap <- renderLeaflet({
       addLabelOnlyMarkers(data = centers,
                           lng = ~x, lat = ~y, label = ~paste("", region),
                           labelOptions = labelOptions(noHide = TRUE, direction = 'top', textOnly = TRUE)) %>%
-      addLegend("bottomright",colors = c("blue","purple", "black","yellow", "green"), 
+      addLegend("bottomright",colors = c("blue","purple", "black","yellow", "green",""), 
                 labels = c("Catch Rate kg/hr", "Distribution No/km<sup>2</sup>", 
                            "Total No of Nephrops per 30 min Haul",
-                           "No of Juvenile Nephrops per 30 min Haul", "No of Adult Nephrops per 30 min Haul"))%>%
+                           "No of Juvenile Nephrops per 30 min Haul", "No of Adult Nephrops per 30 min Haul",paste0("Length cut off for Juvenile/Adult = ",juv_length_split())))%>%
       hideGroup("Stations Surveyed")
     
     return(mymap)
+  }
+  else if (is.na(juv_length_split())==TRUE){
+    mymap <-leaflet() %>%
+      setView(lng = -9, lat = 53, zoom = 6) %>%
+      #addTiles() %>%
+      addProviderTiles(providers$Esri.OceanBasemap) %>%
+      addPolylines(color = "grey",data= div, group = "ICES Sub-Areas", weight = 3)%>%
+      addPolylines(color = "darkgrey",data= cont, group = "ICES Sub-Areas", weight = 3)%>%
+      #addControl(html = html_legend, position = "bottomright")%>%
+      addLegend("bottomright",colors = c("blue","purple", "black"), 
+                labels = c("Catch Rate kg/hr", "Distribution No/km<sup>2</sup>",  "Total No of Fish per 30 min Haul"))%>%
+      hideGroup("Stations Surveyed")
+    
+    return(mymap)
+    
   }
   else {mymap <-leaflet() %>%
     setView(lng = -9, lat = 53, zoom = 6) %>%
@@ -432,9 +447,9 @@ output$mymap <- renderLeaflet({
     addPolylines(color = "grey",data= div, group = "ICES Sub-Areas", weight = 3)%>%
     addPolylines(color = "darkgrey",data= cont, group = "ICES Sub-Areas", weight = 3)%>%
     #addControl(html = html_legend, position = "bottomright")%>%
-    addLegend("bottomright",colors = c("blue","purple", "black", "yellow", "green"), 
+    addLegend("bottomright",colors = c("blue","purple", "black", "yellow", "green",""), 
               labels = c("Catch Rate kg/hr", "Distribution No/km<sup>2</sup>",  "Total No of Fish per 30 min Haul", 
-                         "No of Juvenile Fish per 30 min Haul", "No of Adult Fish per 30 min Haul"))%>%
+                         "No of Juvenile Fish per 30 min Haul", "No of Adult Fish per 30 min Haul",paste0("Length cut off for Juvenile/Adult = ",juv_length_split())))%>%
    hideGroup("Stations Surveyed")
    
   return(mymap)}
@@ -556,7 +571,7 @@ output$cpueplotall=renderPlotly({
     catchAll <- aggregate(list(KgHr=N_FU()$Kg_Hr), list(Cruise=N_FU()$Survey_Code, Year= N_FU()$Year),mean, na.rm=TRUE)
     p=ggplot(N_FU(), aes(x=Year, y=Kg_Hr)) + 
       geom_jitter(width = 0.05, colour="grey",aes(text=sprintf("Station: %s", Haul))) + 
-      geom_line(data=catchAll, aes(x=Year, y =KgHr), size=1)+ylab("KG/Hour") + facet_wrap(~Functional_Unit)+
+      geom_line(data=catchAll, aes(x=Year, y =KgHr), size=0.5)+ylab("KG/Hour") + facet_wrap(~Functional_Unit)+
       theme_bw()  + theme(legend.position = "none")+ 
       theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5,size=8))+
       scale_x_continuous(breaks=datN$Year) + theme(axis.title.x=element_blank())
@@ -581,7 +596,7 @@ output$cpueplotall=renderPlotly({
    catchAll <- aggregate(list(KgHr=datS()$Kg_Per_Hr), list(Cruise=datS()$Cruise, Year= datS()$Year),mean, na.rm=TRUE)
    p=ggplot(datS(), aes(x=Year, y=Kg_Per_Hr)) + 
      geom_point(width = 0.05,colour="grey",aes(text=sprintf("Station: %s", Haul)))+ 
-     geom_line(data=catchAll, aes(x=Year, y =KgHr), size=1)+ ylab("KG/Hour") +
+     geom_line(data=catchAll, aes(x=Year, y =KgHr), size=0.5)+ ylab("KG/Hour") +
      theme_bw() + theme(legend.position = "none")
    ggplotly(p)
    
@@ -593,7 +608,7 @@ output$cpueplotparam=renderPlotly({
   if(input$sp1=="Nephrops"){ 
     catchsex <- aggregate(list(KgHr=N_FU()$Kg_Hr), list(Cruise=N_FU()$Survey_Code, Year= N_FU()$Year,Sex=N_FU()$Sex),mean, na.rm=TRUE)
   p=ggplot(N_FU(), aes(x=Year, y=Kg_Hr,colour=Sex)) + geom_jitter(width = 0.05,aes(text=sprintf("Station: %s", Haul))) + 
-    geom_line(data=catchsex, aes(x=Year, y =KgHr), size=1)+ ylab("KG/Hour") + facet_wrap(~Sex)+
+    geom_line(data=catchsex, aes(x=Year, y =KgHr), size=0.5,colour="black")+ ylab("KG/Hour") + facet_wrap(~Sex)+
     theme_bw() + theme(legend.position = "none")+
     theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5,size=8))+
     scale_x_continuous(breaks=datN$Year)+ theme(axis.title.x=element_blank())
@@ -605,14 +620,14 @@ output$cpueplotparam=renderPlotly({
     catchSex <- aggregate(list(KgHr=datS()$Kg_Per_Hr), 
                           list(Cruise=datS()$Cruise, Year=datS()$Year, fldSex=datS()$fldSex), mean, na.rm=TRUE)
     p=ggplot(datS(), aes(x=Year, y=Kg_Per_Hr, colour=fldSex)) + geom_jitter(width = 0.05,aes(text=sprintf("Station: %s", Haul))) + 
-      geom_line(data=catchSex, aes(x=Year, y =KgHr), size=1)+ ylab("KG/Hour") +  scale_color_manual(values=c("U"="#F8766D","F"="#00BFC4","M"="#B79F00"))+
+      geom_line(data=catchSex, aes(x=Year, y =KgHr), size=0.5,colour="black")+ ylab("KG/Hour") +  scale_color_manual(values=c("U"="#F8766D","F"="#00BFC4","M"="#B79F00"))+
       facet_wrap(~fldSex) + theme_bw() + theme(legend.position = "none")
   }else if(input$parameter=="Gear"){
     catchGear <- aggregate(list(KgHr=datS()$Kg_Per_Hr), 
-                           list(Cruise=datS()$Cruise, Year= datS()$Year, fldGearDescription=datS()$fldGearDescription), mean, na.rm=TRUE)
-    p=ggplot(datS(), aes(x=Year, y=Kg_Per_Hr, colour=fldGearDescription)) + geom_jitter(width = 0.05,aes(text=sprintf("Station: %s", Haul))) + 
-      geom_line(data=catchGear, aes(x=Year, y =KgHr), size=1)+ ylab("KG/Hour") +
-      facet_wrap(~fldGearDescription) + theme_bw() + theme(legend.position = "none")
+                           list(Cruise=datS()$Cruise, Year= datS()$Year, GearDescription=datS()$GearDescription), mean, na.rm=TRUE)
+    p=ggplot(datS(), aes(x=Year, y=Kg_Per_Hr, colour=GearDescription)) + geom_jitter(width = 0.05,aes(text=sprintf("Station: %s", Haul))) + 
+      geom_line(data=catchGear, aes(x=Year, y =KgHr), size=0.5,colour="black")+ ylab("KG/Hour") +
+      facet_wrap(~GearDescription) + theme_bw() + theme(legend.position = "none")
   }else if(input$parameter=="Division"){
     if(is.null(input$division1)){
       p=NULL
@@ -622,7 +637,7 @@ output$cpueplotparam=renderPlotly({
                              list(Cruise=cpuebydiv$Cruise, Year= cpuebydiv$Year,  
                                   ICESCODE=cpuebydiv$ICESCODE), mean, na.rm=TRUE)
       p=ggplot(cpuebydiv, aes(x=Year, y=Kg_Per_Hr, colour=ICESCODE)) + geom_jitter(width = 0.05,aes(text=sprintf("Station: %s", Haul))) + 
-        geom_line(data=catchArea, aes(x=Year, y =KgHr), size=1)+ ylab("KG/Hour") +
+        geom_line(data=catchArea, aes(x=Year, y =KgHr), size=0.5,colour="black")+ ylab("KG/Hour") +
         facet_wrap(~ICESCODE) + theme_bw() + theme(legend.position = "none")+ scale_colour_manual(values=def)
     }
   }
@@ -638,7 +653,7 @@ output$abundanceplotall=renderPlotly({
     meanAll <- aggregate(N_FU()[,c("No_Km2")],by=list(N_FU()$Year),FUN=mean,  na.rm=TRUE)
     names(meanAll)=c("Year", "No_Km2")
     p=ggplot(N_FU(), aes(x=Year, y=No_Km2)) + geom_jitter(width = 0.05, colour="grey") + 
-      geom_line(data=meanAll, aes(x=Year, y =No_Km2), size=1)+ ylab("No/KM<sup>2</sup>") + facet_wrap(~Functional_Unit)+
+      geom_line(data=meanAll, aes(x=Year, y =No_Km2), size=0.5)+ ylab("No/KM<sup>2</sup>") + facet_wrap(~Functional_Unit)+
       theme_bw()  + theme(legend.position = "none")+
       theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5,size=8))+
       scale_x_continuous(breaks=datN$Year) + theme(axis.title.x=element_blank())
@@ -648,7 +663,7 @@ output$abundanceplotall=renderPlotly({
   else{meanAll<-aggregate(data1S()[,c("catch_km2","No_km2")],by=list(data1S()$Yr),FUN=mean,  na.rm=TRUE) 
   names(meanAll)=c("Year", "catch_km2", "No_km2")
   p=ggplot(data1S(), aes(x=Yr, y=No_km2)) + geom_jitter(width = 0.05, colour="grey") + 
-    geom_line(data=meanAll, aes(x=Year, y =No_km2), size=1)+ 
+    geom_line(data=meanAll, aes(x=Year, y =No_km2), size=0.5)+ 
     ylab("No/KM<sup>2</sup>")+ xlab("Year") +
     theme_bw() + theme(legend.position = "none")
   ggplotly(p)}
@@ -659,7 +674,7 @@ output$abundanceplotparam=renderPlotly({
     meansex <- aggregate(N_FU()[,c("No_Km2")],by=list(N_FU()$Year,N_FU()$Sex),FUN=mean,  na.rm=TRUE)
     names(meansex)=c("Year", "Sex", "No_Km2")
     p=ggplot(N_FU(), aes(x=Year, y=No_Km2, colour=Sex)) + geom_jitter(width = 0.05) + 
-      geom_line(data=meansex, aes(x=Year, y =No_Km2), size=1)+ ylab("No/KM<sup>2</sup>") + facet_wrap(~Sex)+
+      geom_line(data=meansex, aes(x=Year, y =No_Km2),size=0.5,colour="black")+ ylab("No/KM<sup>2</sup>") + facet_wrap(~Sex)+
       theme_bw()  + theme(legend.position = "none")+
       theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5,size=8))+
       scale_x_continuous(breaks=datN$Year) + theme(axis.title.x=element_blank())
@@ -671,7 +686,7 @@ output$abundanceplotparam=renderPlotly({
     meanSex<-aggregate(data1S()[,c("catch_km2","No_km2")], by=list(data1S()$Yr, data1S()$Sex),FUN=mean,  na.rm=TRUE)
     names(meanSex)=c("Year", "Sex", "catch_km2", "No_km2")
     p=ggplot(data1S(),aes(x=Yr, y=No_km2, colour=Sex)) +geom_jitter(width=0.05) + 
-      geom_line(data=meanSex, aes(x=Year, y =No_km2), size=1)+   scale_color_manual(values=c("U"="#F8766D","F"="#00BFC4","M"="#B79F00"))+
+      geom_line(data=meanSex, aes(x=Year, y =No_km2), size=0.5,colour="black")+   scale_color_manual(values=c("U"="#F8766D","F"="#00BFC4","M"="#B79F00"))+
       labs(y = "No/KM<sup>2</sup>", x="Year") +
       facet_wrap(~Sex) + theme_bw() + theme(legend.position = "none")
   }else if(input$parameter=="Gear"){
@@ -679,7 +694,7 @@ output$abundanceplotparam=renderPlotly({
                         by=list(data1S()$Yr, data1S()$fldGearDescription),FUN=mean,  na.rm=TRUE)
     names(meanGear)=c("Year", "fldGearDescription", "catch_km2", "No_km2")
     p=ggplot(data1S(),aes(x=Yr, y=No_km2, colour=fldGearDescription)) +geom_jitter(width=0.05) + 
-      geom_line(data=meanGear, aes(x=Year, y =No_km2), size=1)+
+      geom_line(data=meanGear, aes(x=Year, y =No_km2),size=0.5,colour="black" )+
       labs(y = "No/KM<sup>2</sup>", x="Year") +
       facet_wrap(~fldGearDescription) + theme_bw() + theme(legend.position = "none")
   }else if(input$parameter=="Division"){
@@ -692,7 +707,7 @@ output$abundanceplotparam=renderPlotly({
                          by=list(abundancebydiv$Yr,abundancebydiv$ICESCODE), FUN=mean, na.rm=TRUE)
       names(meanDiv)=c("Year", "ICESCODE", "catch_km2", "No_km2")
       p=ggplot(abundancebydiv, aes(x=Yr, y=No_km2, colour=ICESCODE)) + geom_jitter(width = 0.05) + 
-        geom_line(data=meanDiv, aes(x=Year, y =No_km2), size=1)+
+        geom_line(data=meanDiv, aes(x=Year, y =No_km2),size=0.5,colour="black" )+
         labs(y = "No/KM<sup>2</sup>", x="Year") +
         facet_wrap(~ICESCODE) + theme_bw() + theme(legend.position = "none")+ scale_colour_manual(values=def)
     }
@@ -718,7 +733,7 @@ output$lfplotall=renderPlot({
   names(lftotal)=c("Year", "LengthClass", "CatchNos", "CatchNos30minHaul")
   ggplot(lftotal, aes(LengthClass, Year, height = CatchNos, group = Year, alpha=.5)) + 
     geom_density_ridges(stat = "identity", scale = 2.6) + 
-    labs(y = "Year", x="Length Class") +
+    labs(y = "Year", x="Length Class") +scale_y_continuous(breaks=lftotal$Year)+ 
     theme_bw() + theme(legend.position = "none")+ geom_vline(xintercept=juv_length_split())}
 })
  
@@ -738,7 +753,7 @@ output$lfplotall=renderPlot({
      geom_density_ridges(stat = "identity", scale = 2.6) +  
       labs(y = "Year", x="Length Class") +
       facet_wrap(~fldSex) + theme_bw()+scale_fill_manual(values=c("U"="#F8766D","F"="#00BFC4","M"="#B79F00"))+
-    theme(legend.position = "none")+ geom_vline(xintercept=juv_length_split())
+    theme(legend.position = "none")+ geom_vline(xintercept=juv_length_split())+scale_y_continuous(breaks=lfsex$Year) 
    }
     else if(input$parameter=="Gear"){
     lfgear<-aggregate(LengthDataS()[,c("CatchNos", "CatchNos30minHaul")],
@@ -749,7 +764,7 @@ output$lfplotall=renderPlot({
     MakingZeros$CatchNos[is.na(MakingZeros$CatchNos)] <- 0
      MakingZeros$CatchNos30minHaul[is.na(MakingZeros$CatchNos30minHaul)] <- 0
      ggplot(MakingZeros, aes(LengthClass, Year, height = CatchNos, fill=fldGearDescription,  group = Year, alpha=.5)) + 
-       geom_density_ridges(stat = "identity", scale = 2.6) + labs(y = "Year", x="Length Class") +
+       geom_density_ridges(stat = "identity", scale = 2.6) + labs(y = "Year", x="Length Class") +scale_y_continuous(breaks=lfgear$Year) +
        facet_wrap(~fldGearDescription) + theme_bw() + theme(legend.position = "none")+ geom_vline(xintercept=juv_length_split())
    }else if(input$parameter=="Division"){
      if(is.null(input$division1)){
@@ -776,7 +791,7 @@ output$lfplotall=renderPlot({
        lfbydiv=filter(MakingZeros, ICESCODE %in% c(input$division1))
        ggplot(lfbydiv, aes(LengthClass, Year, height = CatchNos, fill=ICESCODE, group = Year, alpha=.5)) + 
          geom_density_ridges(stat = "identity", scale = 2.6) + 
-         labs(y = "Year", x="Length Class") + scale_fill_manual(values=def)+
+         labs(y = "Year", x="Length Class") + scale_fill_manual(values=def)+scale_y_continuous(breaks=lfdiv$Year) +
          facet_wrap(~ICESCODE) + theme_bw() + theme(legend.position = "none")+ geom_vline(xintercept=juv_length_split())
      }
    }
@@ -785,17 +800,22 @@ output$lfplotall=renderPlot({
  
  #Length/Freq UI
  output$lengthfrequi= renderUI({
+  list( "Total number in the survey",
    if(input$sp1=="Nephrops"){ 
-     fluidRow(column(5,list(plotOutput("lfplotall"),"Vertical line is the length cut off for Juvenile/Adult classification( If available) ")),
+     fluidRow(column(5,list(plotOutput("lfplotall"),paste("Vertical line is the length cut off for",input$sp1, "Juvenile/Adult(",juv_length_split(),"cm)"))),
                                        column(7, plotOutput("lfplotparam"))
    )}
    else{if(dim(LengthDataS())[1]==0){
      h3(paste("No Length data available for",species()))
    }else if(dim(LengthDataS())[1]>0){
-     fluidRow(column(5,list(plotOutput("lfplotall"),"Vertical line is the length cut off for Juvenile/Adult classification( If available) ")),
+     if(is.na(juv_length_split())==FALSE){
+     fluidRow(column(5,list(plotOutput("lfplotall"),paste("Vertical line is the length cut off for",input$sp1, "Juvenile/Adult(",juv_length_split(),"cm)"))),
                    column(7, plotOutput("lfplotparam"))
-          )
-   }}
+     )}
+     else{ fluidRow(column(5,plotOutput("lfplotall")),
+                    column(7, plotOutput("lfplotparam"))
+     )}
+   }})
  })
  
  ##########################
@@ -1352,6 +1372,22 @@ output$cohorttab=renderUI({
    },
    contentType = "application/csv"
  )
+
+output$downloadData_L <- downloadHandler(
+  filename = function() {
+    
+    paste(speciesFAO(), "_Length_data",".csv", sep = "")
+  },
+  content = function(file) {
+    write.csv(LengthDataS(), file, row.names = FALSE)
+  },
+  contentType = "application/csv"
+)
+output$Ldownload=renderUI({
+  if(input$tabselected=="lf" & input$sp1!="Nephrops"){
+    downloadButton("downloadData_L", "Download Length data")
+  }
+})
  
  
  output$downloadData_LWA <- downloadHandler(
@@ -1360,7 +1396,7 @@ output$cohorttab=renderUI({
      paste(speciesFAO(), "_Length_Weight_Age_data",".csv", sep = "")
    },
    content = function(file) {
-     write.csv(LengthWeightAgeSp(), file, row.names = FALSE)
+     write.csv(LengthWeightAgeSp1(), file, row.names = FALSE)
    },
    contentType = "application/csv"
  )
@@ -1370,13 +1406,40 @@ output$cohorttab=renderUI({
    }
  })
  
+ LifeP=reactive({
+   if(input$tabselected=="la"){
+   dplyr::filter(coeff_L_A,Cohort=="No",Species%in%speciesFAO())}
+   else if (input$tabselected=="co"){
+     dplyr::filter(coeff_L_A,Cohort=="Yes",Species%in%speciesFAO()) 
+   }
+   
+ })
+ output$downloadData_LP <- downloadHandler(
+   filename = function() {
+     
+     paste(speciesFAO(), "_Life_Parameters",".csv", sep = "")
+   },
+   content = function(file) {
+     write.csv(LifeP(), file, row.names = FALSE)
+   },
+   contentType = "application/csv"
+ )
+ output$LPdownload=renderUI({
+   if(input$tabselected=="la" | input$tabselected=="co"){
+     downloadButton("downloadData_LP", "Download Life parameters")
+   }
+ })
+ 
+ mapd=reactive({
+   subset(mapdataS, No_km2>0 & Species%in%speciesFAO())
+ }) 
  output$downloadData_map <- downloadHandler(
    filename = function() {
      paste(speciesFAO(), "_Map_data",".csv", sep = "")
    },
    content = function(file) {
      if(input$sp1=="Nephrops"){write.csv(dat_raised, file, row.names = FALSE)}
-     else{write.csv(mapdataSS(), file, row.names = FALSE)}
+     else{write.csv(mapd(), file, row.names = FALSE)}
    },
    contentType = "application/csv"
  )
