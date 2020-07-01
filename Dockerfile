@@ -21,7 +21,7 @@ COPY R /srv/shiny-server/igfsexplorer/R
 COPY IGFStest.Rproj /srv/shiny-server/igfsexplorer/
 COPY README.md /srv/shiny-server/igfsexplorer/
 COPY app.js /srv/shiny-server/igfsexplorer/
-COPY global.R /srv/shiny-server/igfexplorer/
+COPY global.R /srv/shiny-server/igfsexplorer/
 COPY google-analytics.js /srv/shiny-server/igfsexplorer/
 COPY server.R /srv/shiny-server/igfsexplorer/
 COPY ui.R /srv/shiny-server/igfsexplorer/
