@@ -14,17 +14,17 @@ RUN Rscript -e "install.packages(c('plotly','shiny','shinyjs','htmltools','resha
 RUN Rscript -e "install.packages(c('rgdal'), repos='https://cran.rstudio.com/')" && rm -rf /tmp/downloaded_packages/ /tmp/*.rds
 
 
-COPY www /srv/shiny-server/igfstest/www
-COPY Data /srv/shiny-server/igfstest/Data
-COPY Indices /srv/shiny-server/igfstest/Indices
-COPY R /srv/shiny-server/igfstest/R
-COPY IGFStest.Rproj /srv/shiny-server/igfstest/
-COPY README.md /srv/shiny-server/igfstest/
-COPY app.js /srv/shiny-server/igfstest/
-COPY global.R /srv/shiny-server/igfstest/
-COPY google-analytics.js /srv/shiny-server/igfstest/
-COPY server.R /srv/shiny-server/igfstest/
-COPY ui.R /srv/shiny-server/igfstest/
+COPY www /srv/shiny-server/igfsexplorer/www
+COPY Data /srv/shiny-server/igfsexplorer/Data
+COPY Indices /srv/shiny-server/igfsexplorer/Indices
+COPY R /srv/shiny-server/igfsexplorer/R
+COPY IGFStest.Rproj /srv/shiny-server/igfsexplorer/
+COPY README.md /srv/shiny-server/igfsexplorer/
+COPY app.js /srv/shiny-server/igfsexplorer/
+COPY global.R /srv/shiny-server/igfexplorer/
+COPY google-analytics.js /srv/shiny-server/igfsexplorer/
+COPY server.R /srv/shiny-server/igfsexplorer/
+COPY ui.R /srv/shiny-server/igfsexplorer/
 
 EXPOSE 3838
 CMD ["/usr/bin/shiny-server.sh"]
